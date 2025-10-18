@@ -10,7 +10,7 @@ export const astroBuildTimeConstants = {
     epoch: 1758444256,
     seconds: 15,
     minutes: 44,
-    hours: 10,
+    hours: 8,
     fullYear: 2025,
     month: 9,
     date: 21,
@@ -25,7 +25,7 @@ export const astroBuildTimeConstants = {
 }
 ```
 
-Internal objects contains built-in constants, such as the build date.
+Internal objects contains built-in constants, such as the build date. All internal values are expressed in UTC to match the ISO timestamp.
 
 Custom object is the object passed as a parameter of ```buildTimeConstants()```
 when initializing the integration in ```astro.config.mjs```. This ease usage

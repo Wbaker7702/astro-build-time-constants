@@ -17,12 +17,12 @@ function runAstroBuildTimeConstants(buildTimeConstantsConfig: BuildTimeConstants
   text += `export const astroBuildTimeConstants = {\n`
   text += `  internal: {\n`,
   text += `    epoch: ${epoch},\n`,
-  text += `    seconds: ${now.getSeconds()},\n`,
-  text += `    minutes: ${now.getMinutes()},\n`,
-  text += `    hours: ${now.getHours()},\n`,
-  text += `    fullYear: ${now.getFullYear()},\n`,
-  text += `    month: ${now.getMonth()+1},\n`,
-  text += `    date: ${now.getDate()},\n`,
+  text += `    seconds: ${now.getUTCSeconds()},\n`,
+  text += `    minutes: ${now.getUTCMinutes()},\n`,
+  text += `    hours: ${now.getUTCHours()},\n`,
+  text += `    fullYear: ${now.getUTCFullYear()},\n`,
+  text += `    month: ${now.getUTCMonth()+1},\n`,
+  text += `    date: ${now.getUTCDate()},\n`,
   text += `    iso: "${now.toISOString()}",\n`,
   text += `  },\n`
   text += `  custom: ${JSON.stringify(buildTimeConstantsConfig, null,  "  ").replaceAll('\n', '\n  ')},\n`,
