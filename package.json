@@ -1,6 +1,6 @@
 {
   "name": "astro-build-time-constants",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Astro integration to define build-time constants: dates, custom properties,...",
   "keywords": [
     "astro",
@@ -19,13 +19,26 @@
   "license": "MIT",
   "author": "Pascal Brand",
   "type": "commonjs",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "prepare": "npm run build"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "astro": "^5.13.9",
-    "typescript": "^5.9.2"
+    "@types/node": "^24.10.1",
+    "astro": "^5.16.3",
+    "rimraf": "^5.0.10",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.5"
   }
 }

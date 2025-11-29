@@ -26,6 +26,9 @@ export const astroBuildTimeConstants = {
 ```
 
 Internal objects contains built-in constants, such as the build date. All internal values are expressed in UTC to match the ISO timestamp.
+The integration now resolves the file path from your Astro configuration, so
+custom `srcDir` values are automatically supported and the target directory is
+created when missing.
 
 Custom object is the object passed as a parameter of ```buildTimeConstants()```
 when initializing the integration in ```astro.config.mjs```. This ease usage
@@ -44,6 +47,17 @@ import { astroBuildTimeConstants } from '../astro-build-time-constants'
   My parameter is {astroBuildTimeConstants.custom.myParam}
 </p>
 ```
+
+## Development workflow
+
+To work on the integration locally in the development environment:
+
+1. Install dependencies with `npm install`.
+2. Run `npm run build` to emit the compiled package into `dist/`.
+3. Run `npm test` to execute the Vitest suite that validates the generator logic.
+
+The build script performs a TypeScript type check before generating the output,
+and the prepare hook ensures `dist/` is always up to date before publishing.
 
 ## Installation
 
