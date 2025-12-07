@@ -33,7 +33,7 @@ describe('enforceSecurityOnConfig', () => {
     expect(() => enforceSecurityOnConfig({ apiSecret: 'value' })).toThrow(/apiSecret/);
   });
 
-  it('allows whitelisted secret keys', () => {
+  it('allows allow-listed secret keys', () => {
     expect(() =>
       enforceSecurityOnConfig(
         { apiSecret: 'value' },
