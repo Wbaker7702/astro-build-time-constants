@@ -31,7 +31,8 @@
     "clean": "rimraf dist",
     "build": "npm run clean && tsc -p tsconfig.json",
     "lint": "tsc --noEmit",
-    "test": "vitest run",
+    "docstrings": "node scripts/check-docstrings.cjs",
+    "test": "npm run docstrings && vitest run",
     "prepare": "npm run build"
   },
   "devDependencies": {

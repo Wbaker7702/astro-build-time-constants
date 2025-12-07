@@ -54,7 +54,10 @@ To work on the integration locally in the development environment:
 
 1. Install dependencies with `npm install`.
 2. Run `npm run build` to emit the compiled package into `dist/`.
-3. Run `npm test` to execute the Vitest suite that validates the generator logic.
+3. Run `npm test` to execute the docstring-coverage gate followed by the Vitest suite.
+
+If you only need to verify documentation coverage, run `npm run docstrings`. The check fails when fewer than
+80% of exported declarations are preceded by a doc comment, matching the repository CI requirement.
 
 The build script performs a TypeScript type check before generating the output,
 and the prepare hook ensures `dist/` is always up to date before publishing.
