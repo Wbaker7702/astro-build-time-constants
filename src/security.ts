@@ -235,7 +235,7 @@ function validateJwtClaims(payload: JwtPayload, options: JwtSecurityOptions, now
     throw new Error('JWT token has expired.');
   }
 
-  if (typeof payload.nbf === 'number' && nowSeconds + tolerance < payload.nbf) {
+  if (typeof payload.nbf === 'number' && nowSeconds < payload.nbf - tolerance) {
     throw new Error('JWT token is not valid yet (nbf check failed).');
   }
 
