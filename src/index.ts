@@ -2,15 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import type { AstroConfig, AstroIntegration } from 'astro' with { "resolution-mode": "import" };
 import { fileURLToPath } from 'url';
-
-export interface BuildTimeConstantsConfigType {
-  [key: string]: unknown;
-}
-
-export interface BuildTimeConstantsOptions {
-  outputFile?: string;
-  now?: Date;
-}
+import type { BuildTimeConstantsConfigType, BuildTimeConstantsOptions } from './types';
+import { enforceSecurityOnConfig } from './security';
+export * from './types';
 
 export const DEFAULT_OUTPUT_FILE = './src/astro-build-time-constants.ts';
 
@@ -53,6 +47,7 @@ export function runAstroBuildTimeConstants(
 ): { filePath: string } {
   const filePath = options.outputFile ?? DEFAULT_OUTPUT_FILE;
   const now = options.now ?? new Date();
+  enforceSecurityOnConfig(buildTimeConstantsConfig, options.security, now);
   const fileContents = createAstroBuildTimeModule(buildTimeConstantsConfig, now);
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -70,13 +65,18 @@ function resolveAstroOutputFile(astroConfig: AstroConfig): string {
 
 export default function buildTimeConstants(
   buildTimeConstantsConfig: BuildTimeConstantsConfigType = {},
+  integrationOptions: BuildTimeConstantsOptions = {},
 ): AstroIntegration {
   return {
     name: 'astro-build-time-constants',
     hooks: {
       'astro:config:done': ({ config }: { config: AstroConfig }) => {
-        const outputFile = resolveAstroOutputFile(config);
-        runAstroBuildTimeConstants(buildTimeConstantsConfig, { outputFile });
+        const outputFile = integrationOptions.outputFile ?? resolveAstroOutputFile(config);
+        runAstroBuildTimeConstants(buildTimeConstantsConfig, {
+          outputFile,
+          now: integrationOptions.now,
+          security: integrationOptions.security,
+        });
       },
     },
   };
