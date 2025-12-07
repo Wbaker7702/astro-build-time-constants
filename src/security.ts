@@ -74,7 +74,7 @@ export function verifyJwtToken(
     );
   }
 
-  const allowedAlgorithms = (jwtOptions.algorithms ?? ['HS256']) as SupportedJwtAlgorithm[];
+  const allowedAlgorithms = jwtOptions.algorithms ?? ['HS256'];
   allowedAlgorithms.forEach((alg) => {
     if (!HASH_ALGORITHM_BY_JWT_ALG[alg]) {
       throw new Error(
