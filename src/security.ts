@@ -231,7 +231,7 @@ function validateJwtClaims(payload: JwtPayload, options: JwtSecurityOptions, now
   const tolerance = options.clockToleranceSeconds ?? 60;
   const nowSeconds = Math.floor(now.getTime() / 1000);
 
-  if (typeof payload.exp === 'number' && nowSeconds - tolerance >= payload.exp) {
+  if (typeof payload.exp === 'number' && nowSeconds >= payload.exp + tolerance) {
     throw new Error('JWT token has expired.');
   }
 
