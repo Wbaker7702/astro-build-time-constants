@@ -214,7 +214,7 @@ function parseJwtSegment<T>(segment: string, segmentName: string): T {
 
 function base64UrlDecode(value: string): Buffer {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4 || 4)) % 4), '=');
+  const padded = normalized.padEnd(normalized.length + (4 - (normalized.length % 4)) % 4, '=');
   return Buffer.from(padded, 'base64');
 }
 
