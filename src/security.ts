@@ -103,7 +103,7 @@ export function verifyJwtToken(
     expectedSignature.length !== providedSignature.length ||
     !crypto.timingSafeEqual(expectedSignature, providedSignature)
   ) {
-    throw new Error('JWT signature verification failed');
+    throw new Error('JWT signature verification failed.');
   }
 
   const payload = parseJwtSegment<JwtPayload>(encodedPayload, 'payload');
