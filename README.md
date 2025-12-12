@@ -48,6 +48,53 @@ import { astroBuildTimeConstants } from '../astro-build-time-constants'
 </p>
 ```
 
+## Security hardening
+
+The integration now ships with two guardrails that help prevent accidental
+secrets leakage and enforce authenticated build pipelines.
+
+- **Secret scanning:** every property passed to `buildTimeConstants()` is scanned
+  for suspicious keys such as `password`, `secret`, `token`, etc. The check
+  fails fast on detection to avoid publishing sensitive data. If you want to
+  intentionally surface a value, add its fully-qualified path (for example
+  `custom.apiSecret`) to `security.secrets.allowList`, or downgrade the strictness
+  to warnings with `security.secrets.mode = 'warn'`.
+- **JWT-gated generation:** set the `ASTRO_BUILD_TIME_TOKEN` and
+  `ASTRO_BUILD_TIME_SECRET` environment variables (or configure
+  `security.jwt`) to require a signed JSON Web Token before the constants file
+  is generated. Tokens are validated with HS256/384/512 signatures, standard
+  `exp`, `nbf`, and `iat` claims, and optional `issuer`, `subject`, and
+  `audience` restrictions.
+
+```ts
+import buildTimeConstants from 'astro-build-time-constants';
+
+export default defineConfig({
+  integrations: [
+    buildTimeConstants(
+      { featureFlag: true },
+      {
+        security: {
+          secrets: {
+            allowList: ['custom.safeToShare'],
+          },
+          jwt: {
+            issuer: 'ci-bot',
+            audience: 'astro-build',
+            required: true,
+          },
+        },
+      },
+    ),
+  ],
+});
+```
+
+By default the JWT validator looks for `ASTRO_BUILD_TIME_TOKEN` and
+`ASTRO_BUILD_TIME_SECRET`. Use `security.jwt.token`, `security.jwt.secret`,
+or the `tokenEnvName` / `secretEnvName` overrides when you need different
+names.
+
 ## Development workflow
 
 To work on the integration locally in the development environment:
