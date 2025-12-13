@@ -50,6 +50,37 @@ describe('enforceSecurityOnConfig', () => {
     );
     expect(spy).toHaveBeenCalledTimes(1);
   });
+
+  it('detects secrets in nested objects', () => {
+    expect(() =>
+      enforceSecurityOnConfig({ nested: { apiSecret: 'value' } }),
+    ).toThrow(/nested.apiSecret/);
+  });
+
+  it('detects secrets in arrays', () => {
+    expect(() =>
+      enforceSecurityOnConfig({ items: [{ password: 'value' }] }),
+    ).toThrow(/items\[0\].password/);
+  });
+
+  it('blocks prototype pollution via __proto__', () => {
+    const maliciousConfig = JSON.parse('{"__proto__": {"polluted": true}}');
+    expect(() =>
+      enforceSecurityOnConfig(maliciousConfig),
+    ).toThrow(/prototype pollution/);
+  });
+
+  it('blocks prototype pollution via constructor', () => {
+    expect(() =>
+      enforceSecurityOnConfig({ constructor: { polluted: true } }),
+    ).toThrow(/prototype pollution/);
+  });
+
+  it('blocks prototype pollution via prototype', () => {
+    expect(() =>
+      enforceSecurityOnConfig({ prototype: { polluted: true } }),
+    ).toThrow(/prototype pollution/);
+  });
 });
 
 describe('verifyJwtToken', () => {
@@ -83,5 +114,38 @@ describe('verifyJwtToken', () => {
 
     const result = verifyJwtToken({}, BASE_DATE);
     expect(result.payload.exp).toBeGreaterThan(Math.floor(BASE_DATE.getTime() / 1000));
+  });
+
+  it('rejects expired tokens', () => {
+    const secret = 'top-secret';
+    const expiredTime = Math.floor(BASE_DATE.getTime() / 1000) - 120; // Expired 2 minutes ago
+    const token = createHs256Token({ exp: expiredTime }, secret);
+
+    expect(() => verifyJwtToken({ token, secret }, BASE_DATE)).toThrow(/expired/);
+  });
+
+  it('rejects tokens with future nbf (not-before) claim', () => {
+    const secret = 'top-secret';
+    const futureTime = Math.floor(BASE_DATE.getTime() / 1000) + 120; // Valid 2 minutes in the future
+    const token = createHs256Token({ nbf: futureTime }, secret);
+
+    expect(() => verifyJwtToken({ token, secret }, BASE_DATE)).toThrow(/not valid yet/);
+  });
+
+  it('accepts tokens with nbf within clock tolerance', () => {
+    const secret = 'top-secret';
+    const slightlyFutureTime = Math.floor(BASE_DATE.getTime() / 1000) + 30; // 30 seconds in the future
+    const token = createHs256Token({ nbf: slightlyFutureTime }, secret);
+
+    // Should not throw because default tolerance is 60 seconds
+    expect(() => verifyJwtToken({ token, secret }, BASE_DATE)).not.toThrow();
+  });
+
+  it('rejects tokens with invalid signature', () => {
+    const secret = 'top-secret';
+    const wrongSecret = 'wrong-secret';
+    const token = createHs256Token({ exp: Math.floor(BASE_DATE.getTime() / 1000) + 60 }, secret);
+
+    expect(() => verifyJwtToken({ token, secret: wrongSecret }, BASE_DATE)).toThrow(/signature verification failed/);
   });
 });
