@@ -26,6 +26,9 @@ export const astroBuildTimeConstants = {
 ```
 
 Internal objects contains built-in constants, such as the build date. All internal values are expressed in UTC to match the ISO timestamp.
+The integration now resolves the file path from your Astro configuration, so
+custom `srcDir` values are automatically supported and the target directory is
+created when missing.
 
 Custom object is the object passed as a parameter of ```buildTimeConstants()```
 when initializing the integration in ```astro.config.mjs```. This ease usage
@@ -44,6 +47,64 @@ import { astroBuildTimeConstants } from '../astro-build-time-constants'
   My parameter is {astroBuildTimeConstants.custom.myParam}
 </p>
 ```
+
+## Security hardening
+
+The integration now ships with two guardrails that help prevent accidental
+secrets leakage and enforce authenticated build pipelines.
+
+- **Secret scanning:** every property passed to `buildTimeConstants()` is scanned
+  for suspicious keys such as `password`, `secret`, `token`, etc. The check
+  fails fast on detection to avoid publishing sensitive data. If you want to
+  intentionally surface a value, add its fully-qualified path (for example
+  `custom.apiSecret`) to `security.secrets.allowList`, or downgrade the strictness
+  to warnings with `security.secrets.mode = 'warn'`.
+- **JWT-gated generation:** set the `ASTRO_BUILD_TIME_TOKEN` and
+  `ASTRO_BUILD_TIME_SECRET` environment variables (or configure
+  `security.jwt`) to require a signed JSON Web Token before the constants file
+  is generated. Tokens are validated with HS256/384/512 signatures, standard
+  `exp`, `nbf`, and `iat` claims, and optional `issuer`, `subject`, and
+  `audience` restrictions.
+
+```ts
+import buildTimeConstants from 'astro-build-time-constants';
+
+export default defineConfig({
+  integrations: [
+    buildTimeConstants(
+      { featureFlag: true },
+      {
+        security: {
+          secrets: {
+            allowList: ['custom.safeToShare'],
+          },
+          jwt: {
+            issuer: 'ci-bot',
+            audience: 'astro-build',
+            required: true,
+          },
+        },
+      },
+    ),
+  ],
+});
+```
+
+By default the JWT validator looks for `ASTRO_BUILD_TIME_TOKEN` and
+`ASTRO_BUILD_TIME_SECRET`. Use `security.jwt.token`, `security.jwt.secret`,
+or the `tokenEnvName` / `secretEnvName` overrides when you need different
+names.
+
+## Development workflow
+
+To work on the integration locally in the development environment:
+
+1. Install dependencies with `npm install`.
+2. Run `npm run build` to emit the compiled package into `dist/`.
+3. Run `npm test` to execute the Vitest suite that validates the generator logic.
+
+The build script performs a TypeScript type check before generating the output,
+and the prepare hook ensures `dist/` is always up to date before publishing.
 
 ## Installation
 
